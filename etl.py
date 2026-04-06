@@ -1,20 +1,28 @@
 import pandas as pd
-import glob
 
-arquivos = glob.glob("data/*.csv")
+# arquivos
+arquivos = [
+    "Fatura_2025-03-20"
+]
 
-dfs = [pd.read_csv(arquivo) for arquivo in arquivos]
+# extract
+dfs = [pd.read_csv(a, encoding="utf-8") for a in arquivos]
 
-df_faturas = pd.concat(dfs)
+# juntar tudo
+df = pd.concat(dfs, ignore_index=True)
 
-df = pd.read_csv(arquivos, sep=";")
+# transform (exemplos)
+df.columns = df.columns.str.lower().str.strip()
 
-print(df_faturas['Categoria'].value_counts())
+# exemplo: converter data
+if "data" in df.columns:
+    df["data"] = pd.to_datetime(df["data"], errors="coerce")
 
-print(df_faturas['Data de Compra'].value_counts())
+# exemplo: valores
+if "valor" in df.columns:
+    df["valor"] = df["valor"].astype(float)
 
-print(df_faturas.sort_values(by='Categoria', ascending=True))
+# load
+df.to_csv("fatura_tratada.csv", index=False)
 
-print(df_faturas['Nome no Cartão'].value_counts())
-
-
+print("ETL finalizado")
